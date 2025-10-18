@@ -122,9 +122,8 @@ def update_user():
     request_body = request.get_json(silent=True) or {}
     
     user_id = request_body.get("user_id")
-    
     if not user_id or user_id not in USERS: # error handling
-        abort(404, "Unknown user id") 
+        abort(404, description="Unknown user id") 
         
     user_info = USERS[user_id]
     
@@ -136,9 +135,27 @@ def update_user():
     user_info["slider_responses"]  = cleaned_responses
     
     return jsonify({"ok": True, "slider_responses": cleaned_responses})
+
+@app.get("/api/user")
+def get_user():
+    user_id = request.args.get("user_id") # parses everything after the ? 
+    if not user_id or user_id not in USERS: # error handling
+        abort(404, description="Unknown user id") 
+    user_info = USERS[user_id]
+    
         
-
-
+    return jsonify({
+        "user_id": user_info["user_id"],
+        "first_name": user_info["first_name"],
+        "last_name": user_info["last_name"],
+        "slider_responses": user_info.get("slider_responses", {}),
+        "swipes": user_info.get("swipes", {}),
+        "good_orgs": user_info.get("good_orgs", []),
+        "bad_orgs": user_info.get("bad_orgs", [])
+    })
+    
+    
+        
 # ----------------------------
 # Questionaire Routes
 # ----------------------------
