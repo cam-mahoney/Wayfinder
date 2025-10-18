@@ -1,27 +1,75 @@
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
 from sklearn.neighbors import NearestNeighbors
-from app import USERS
+# from app import USERS
+import json
+
+USERS = {
+    "user_id": {
+        "user_id": str,
+        "first_name": str,
+        "last_name": str,
+        "slider_responses": {
+            "time_commitment_value": 5,
+            "cost_preference": 5,
+            "goal_balance": 3,
+            "event_frequency": 1,
+            "academic": 7,
+            "sport_type": 4,
+            "competition": 3,
+            "leadership": 9,
+            "environment_value": 3,
+            "social_vs_professional": 6
+        }
+    }
+}
 
 
-def standardize_data(df):
+def standardize_data(clubs, preferences):
     scaler = StandardScaler()
-    standardized_data = scaler.fit_transform(df)
-    standardized_df = pd.DataFrame(standardized_data, columns=df.columns)
-    return standardized_df
+    scaler.fit(clubs)
+    standardized_clubs = scaler.transform(clubs)
+    standardized_preferences = scaler.transform(preferences)
+    standardized_preferences = pd.DataFrame(standardized_preferences, columns=preferences.columns)
+    standardized_clubs = pd.DataFrame(standardized_clubs, columns=clubs.columns)
+    return standardized_clubs, standardized_preferences
 
-def store_slider_responses(users):
+def store_slider_responses(users,user):
     responses = []
-    for user in users.values():
-        responses.append(user["slider_responses"])
+    for u in users.values():
+        if user == u:
+            responses.append(user["slider_responses"])
     df = pd.DataFrame(responses)
     return df
 
-def model(k):
+def extract_club_features(clubs):
+    df = pd.DataFrame(clubs)
+    numerical_columns = ["time_commitment_value", "cost_preference", "goal_balance", 
+                     "event_frequency", "academic", "sport_type", "competition", 
+                     "leadership", "environment_value", "social_vs_professional"]
+    df = df[numerical_columns]
+    return df
+
+def model(user, k):
     users = USERS
+    with open(r'backend\data\orgs.json', 'r') as file:
+        clubs_dict = json.load(file)
+    clubs_df = extract_club_features(clubs_dict)
+    preferences = store_slider_responses(users, user)
+    print(preferences)
+    print(clubs_df)
+    clubs_df,preferences = standardize_data(clubs_df,preferences)
+    print(preferences)
+    print(clubs_df)
+    knn = NearestNeighbors(n_neighbors=k, metric='euclidean')
+    knn.fit(clubs_df)
+    distances, indices = knn.kneighbors(preferences)
+    nearest_clubs_dict = {}
 
-    preferences = store_slider_responses(users)
-    preferences = standardize_data(preferences)
-    knn = NearestNeighbors(n_neighbors=3, metric='euclidean')
-    knn.fit(preferences)
+    for idx, dist in zip(indices[0], distances[0]):
+        club_id = clubs_dict[idx]['id']
+        nearest_clubs_dict[club_id] = dist
 
+    return nearest_clubs_dict
+
+print(model(3))
