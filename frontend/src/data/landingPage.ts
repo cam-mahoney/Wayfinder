@@ -1,6 +1,6 @@
-import avatar from "../assets/avatar.svg";
-import avatar2 from "../assets/avatar-2.svg";
-import image from "../assets/image.svg";
+//import avatar from "../assets/avatar.svg";
+//import avatar2 from "../assets/avatar-2.svg";
+//import image from "../assets/image.svg";
 
 export const customerQuotes = [
   { quote: "A terrific piece of praise", name: "Alice", description: "Great teamwork", avatar },
