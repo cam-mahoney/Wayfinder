@@ -129,8 +129,9 @@ def update_user():
     
     # ensure the user responses are integers 
     cleaned_responses = {}
+    responses = request_body.get("responses") or {}
     
-    for question, response in request_body["responses"]:
+    for question, response in responses.items():
         cleaned_responses[question] = convert_to_int(response)
     user_info["slider_responses"]  = cleaned_responses
     
@@ -159,6 +160,29 @@ def get_user():
 # ----------------------------
 # Questionaire Routes
 # ----------------------------
+@app.get("/api/prompts")
+def get_prompts():
+    return jsonify({"prompts": PROMPTS})
+
+# save user preferences after questionaire submission
+@app.post("/api/questionnaire/submit")
+def submit_questionnaire():
+    request_body = request.get_json(silent=True) or {}
+    user_id = request_body.get("user_id")
+    if not user_id or user_id not in USERS: # error handling
+        abort(404, description="Unknown user id")
+    
+    user_info = USERS[user_id]
+    
+    # ensure the user responses are integers 
+    cleaned_responses = {}
+    responses = request_body.get("responses") or {}
+    
+    for question, response in responses.items():
+        cleaned_responses[question] = convert_to_int(response)
+    user_info["slider_responses"]  = cleaned_responses
+    
+    return jsonify({"ok": True, "slider_responses": cleaned_responses})
 
 
 # ----------------------------
