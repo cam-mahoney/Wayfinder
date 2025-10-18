@@ -56,20 +56,15 @@ def model(user, k):
         clubs_dict = json.load(file)
     clubs_df = extract_club_features(clubs_dict)
     preferences = store_slider_responses(users, user)
-    print(preferences)
-    print(clubs_df)
     clubs_df,preferences = standardize_data(clubs_df,preferences)
-    print(preferences)
-    print(clubs_df)
     knn = NearestNeighbors(n_neighbors=k, metric='euclidean')
     knn.fit(clubs_df)
     distances, indices = knn.kneighbors(preferences)
-    nearest_clubs_dict = {}
+    nearest_clubs = []
 
-    for idx, dist in zip(indices[0], distances[0]):
-        club_id = clubs_dict[idx]['id']
-        nearest_clubs_dict[club_id] = dist
+    for idx in indices[0]:
+        nearest_clubs.append(clubs_dict[idx]['id'])
 
-    return nearest_clubs_dict
+    return nearest_clubs
 
 print(model(3))
