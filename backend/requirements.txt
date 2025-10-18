@@ -1,0 +1,8 @@
+# Core
+Flask>=3.0,<4
+Flask-Cors>=4.0,<5
+
+
+
+scikit-learn>=1.4,<2  # only if you add SVM/ML later
+
