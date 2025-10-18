@@ -1,16 +1,13 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request, abort
 from flask_cors import CORS
-import json, os 
 from uuid import uuid4
+import json, os
+
 
 
 app = Flask(__name__)
 CORS(app)
 
-
-@app.get("/api/health")
-def health():
-    return {"status":"ok"}, 200
 
 # ----------------------------
 # Load  JSON datasets
@@ -48,7 +45,10 @@ for o in ORGS:
 #   "user_id": str,
 #   "first_name": str,
 #   "last_name": str,   
-#   "slider_responses": {question: int},
+#   "slider_responses": { key: int },
+#   "swipes": { org_id: "yes"|"no" },
+#   "liked_orgs": [org_id, ...],
+#   "disliked_orgs": [org_id, ...]
 # }
 """
 USERS = {}
@@ -60,7 +60,10 @@ def new_user(first_name:str, last_name:str):
         "user_id": uid,
         "first_name": first_name,
         "last_name": last_name, 
-        "slider_responses": {} 
+        "slider_responses": {},
+        "swipes": {},
+        "good_orgs": [],
+        "bad_orgs": []
     }
     
     USERS[uid] = user
@@ -68,22 +71,126 @@ def new_user(first_name:str, last_name:str):
 
 
 # ----------------------------
-# Helper functions
+# Helper functions 
 # ----------------------------
 
+def convert_to_int(i, default=0):
+    try:
+        return(int(float(i))) # float in case is a string like "7.5"
+    except Exception:
+        return int(default)
 
+# (for the all organizations page)
 
 
 
 # ----------------------------
-# Routes
+# Basic Routes
 # ----------------------------
+@app.get("/api/health")
+def health():
+    return {"status":"ok"}, 200
+
+# route for registering a new user 
+@app.post("/api/register")
+def register():
+    request_body = request.get_json(silent=True) or {} # in case empty. converts to python dictionarys
+    user = new_user(request_body.get("first_name"), request_body.get("last_name")) # register new user
+    
+    return jsonify({"user_id": user["user_id"], 
+                    "profile": {
+                        "user_id": user["user_id"],
+                        "first_name": user["first_name"],
+                        "last_name": user["last_name"]
+                    }})
+    
+# route for updating a user profile (updates the questionaire answers from the user)
+@app.patch("/api/user")
+def update_user():
+    """
+        Body:
+    {
+      "user_id": "...",
+      "responses": {            # required; any subset is fine
+        "question_1": 7,
+        "question_2": 150,
+        "question_3": 8
+      },
+      "replace": false          # optional; if true, replace all answers
+    }
+    """
+    request_body = request.get_json(silent=True) or {}
+    
+    user_id = request_body.get("user_id")
+    if not user_id or user_id not in USERS: # error handling
+        abort(404, description="Unknown user id") 
+        
+    user_info = USERS[user_id]
+    
+    # ensure the user responses are integers 
+    cleaned_responses = {}
+    responses = request_body.get("responses") or {}
+    
+    for question, response in responses.items():
+        cleaned_responses[question] = convert_to_int(response)
+    user_info["slider_responses"]  = cleaned_responses
+    
+    return jsonify({"ok": True, "slider_responses": cleaned_responses})
+
+@app.get("/api/user")
+def get_user():
+    user_id = request.args.get("user_id") # parses everything after the ? 
+    if not user_id or user_id not in USERS: # error handling
+        abort(404, description="Unknown user id") 
+    user_info = USERS[user_id]
+    
+        
+    return jsonify({
+        "user_id": user_info["user_id"],
+        "first_name": user_info["first_name"],
+        "last_name": user_info["last_name"],
+        "slider_responses": user_info.get("slider_responses", {}),
+        "swipes": user_info.get("swipes", {}),
+        "good_orgs": user_info.get("good_orgs", []),
+        "bad_orgs": user_info.get("bad_orgs", [])
+    })
+    
+    
+        
+# ----------------------------
+# Questionaire Routes
+# ----------------------------
+@app.get("/api/prompts")
+def get_prompts():
+    return jsonify({"prompts": PROMPTS})
+
+# save user preferences after questionaire submission
+@app.post("/api/questionnaire/submit")
+def submit_questionnaire():
+    request_body = request.get_json(silent=True) or {}
+    user_id = request_body.get("user_id")
+    if not user_id or user_id not in USERS: # error handling
+        abort(404, description="Unknown user id")
+    
+    user_info = USERS[user_id]
+    
+    # ensure the user responses are integers 
+    cleaned_responses = {}
+    responses = request_body.get("responses") or {}
+    
+    for question, response in responses.items():
+        cleaned_responses[question] = convert_to_int(response)
+    user_info["slider_responses"]  = cleaned_responses
+    
+    return jsonify({"ok": True, "slider_responses": cleaned_responses})
 
 
-
+# ----------------------------
+# Swiping Routes
+# ----------------------------
 
 
 
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
