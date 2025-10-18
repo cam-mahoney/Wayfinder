@@ -1,16 +1,13 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
-import json, os 
 from uuid import uuid4
+import json, os 
+
 
 
 app = Flask(__name__)
 CORS(app)
 
-
-@app.get("/api/health")
-def health():
-    return {"status":"ok"}, 200
 
 # ----------------------------
 # Load  JSON datasets
@@ -48,7 +45,10 @@ for o in ORGS:
 #   "user_id": str,
 #   "first_name": str,
 #   "last_name": str,   
-#   "slider_responses": {question: int},
+#   "slider_responses": { key: int },
+#   "swipes": { org_id: "yes"|"no" },
+#   "liked_orgs": [org_id, ...],
+#   "disliked_orgs": [org_id, ...]
 # }
 """
 USERS = {}
@@ -60,7 +60,10 @@ def new_user(first_name:str, last_name:str):
         "user_id": uid,
         "first_name": first_name,
         "last_name": last_name, 
-        "slider_responses": {} 
+        "slider_responses": {},
+        "swipes": {},
+        "good_orgs": [],
+        "bad_orgs": []
     }
     
     USERS[uid] = user
@@ -68,22 +71,54 @@ def new_user(first_name:str, last_name:str):
 
 
 # ----------------------------
-# Helper functions
+# Helper functions 
+# ----------------------------
+
+def convert_to_int(i, default=0):
+    try:
+        return(int(float(i))) # float in case is a string like "7.5"
+    except Exception:
+        return int(default)
+
+# (for the all organizations page)
+
+
+
+# ----------------------------
+# Basic Routes
+# ----------------------------
+@app.get("/api/health")
+def health():
+    return {"status":"ok"}, 200
+
+# route for registering a new user 
+@app.post("/api/register")
+def register():
+    request_body = request.get_json(silent=True) or {} # in case empty. converts to python dictionarys
+    user = new_user(request_body.get("first_name"), request_body.get("last_name")) # register new user
+    
+    return jsonify({"user_id": user["user_id"], 
+                    "profile": {
+                        "user_id": user["user_id"],
+                        "first_name": user["first_name"],
+                        "last_name": user["last_name"]
+                    }})
+    
+# route for updating a user profile (questionaire)
+
+
+
+# ----------------------------
+# Questionaire Routes
 # ----------------------------
 
 
-
-
-
 # ----------------------------
-# Routes
+# Swiping Routes
 # ----------------------------
-
-
-
 
 
 
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
