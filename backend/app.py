@@ -1,7 +1,7 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, abort
 from flask_cors import CORS
 from uuid import uuid4
-import json, os 
+import json, os
 
 
 
@@ -104,8 +104,39 @@ def register():
                         "last_name": user["last_name"]
                     }})
     
-# route for updating a user profile (questionaire)
-
+# route for updating a user profile (updates the questionaire answers from the user)
+@app.patch("/api/user")
+def update_user():
+    """
+        Body:
+    {
+      "user_id": "...",
+      "responses": {            # required; any subset is fine
+        "question_1": 7,
+        "question_2": 150,
+        "question_3": 8
+      },
+      "replace": false          # optional; if true, replace all answers
+    }
+    """
+    request_body = request.get_json(silent=True) or {}
+    
+    user_id = request_body.get("user_id")
+    
+    if not user_id or user_id not in USERS: # error handling
+        abort(404, "Unknown user id") 
+        
+    user_info = USERS[user_id]
+    
+    # ensure the user responses are integers 
+    cleaned_responses = {}
+    
+    for question, response in request_body["responses"]:
+        cleaned_responses[question] = convert_to_int(response)
+    user_info["slider_responses"]  = cleaned_responses
+    
+    return jsonify({"ok": True, "slider_responses": cleaned_responses})
+        
 
 
 # ----------------------------
