@@ -1,0 +1,102 @@
+[
+  {
+    "id": "slider_time_commitment",
+    "question": "How many hours per week are you willing to commit to a club?",
+    "dimension": "time_commitment",
+    "min": 2,
+    "max": 15,
+    "left_label": "2 hrs/week",
+    "right_label": "15 hrs/week",
+    "tags": ["social","community","career"]
+  },
+  {
+    "id": "slider_cost_preference",
+    "question": "How much are you comfortable spending on club fees per year?",
+    "dimension": "cost_preference",
+    "min": 0,
+    "max": 500,
+    "left_label": "Prefer Free",
+    "right_label": "$500+/year",
+    "tags": ["social","community","career","STEM"]
+  },
+  {
+    "id": "slider_environment",
+    "question": "Do you prefer clubs with indoor or outdoor activities?",
+    "dimension": "environment",
+    "min": 0,
+    "max": 10,
+    "left_label": "Indoor",
+    "right_label": "Outdoor",
+    "tags": ["outdoors","social","community","sport"]
+  },
+  {
+    "id": "slider_social_vs_professional",
+    "question": "Are you more interested in social clubs or professional clubs?",
+    "dimension": "goal_balance",
+    "min": 0,
+    "max": 10,
+    "left_label": "Social",
+    "right_label": "Professional",
+    "tags": ["social","career","community","STEM","entrepreneurship"]
+  },
+  {
+    "id": "slider_event_frequency",
+    "question": "How often should your ideal club host events?",
+    "dimension": "event_frequency",
+    "min": 1,
+    "max": 8,
+    "left_label": "Rare (1/mo)",
+    "right_label": "Very Frequent (8+/mo)",
+    "tags": ["social","community","career"]
+  },
+  {
+    "id": "slider_academic_focus",
+    "question": "How important is academic or educational value in a club?",
+    "dimension": "academic",
+    "min": 0,
+    "max": 10,
+    "left_label": "Not Important",
+    "right_label": "Very Important",
+    "tags": ["STEM","career","community"]
+  },
+  {
+    "id": "slider_sport_preference",
+    "question": "Do you prefer low-intensity recreational clubs or high-intensity athletic clubs?",
+    "dimension": "sport_type",
+    "min": 0,
+    "max": 10,
+    "left_label": "Recreational",
+    "right_label": "Athletic",
+    "tags": ["sport","outdoors","social"]
+  },
+  {
+    "id": "slider_competition",
+    "question": "How competitive should the club environment be?",
+    "dimension": "competition",
+    "min": 0,
+    "max": 10,
+    "left_label": "Casual",
+    "right_label": "Competitive",
+    "tags": ["sport","gaming","STEM","career","entrepreneurship","social"]
+  },
+  {
+    "id": "slider_leadership",
+    "question": "How interested are you in clubs with leadership opportunities?",
+    "dimension": "leadership",
+    "min": 0,
+    "max": 10,
+    "left_label": "Not Interested",
+    "right_label": "Very Interested",
+    "tags": ["community","career","entrepreneurship","social"]
+  },
+  {
+    "id": "slider_group_size",
+    "question": "Do you prefer small, tight-knit groups or large, active organizations?",
+    "dimension": "org_size",
+    "min": 0,
+    "max": 10,
+    "left_label": "Small Groups",
+    "right_label": "Large Orgs",
+    "tags": ["social","community"]
+  }
+]
