@@ -6,6 +6,22 @@ import json
 
 USERS = {
     "user_id": {
+        "first_name": str,
+        "last_name": str,
+        "slider_responses": {
+            "time_commitment_value": 5,
+            "cost_preference": 5,
+            "goal_balance": 3,
+            "event_frequency": 1,
+            "academic": 7,
+            "sport_type": 4,
+            "competition": 3,
+            "leadership": 9,
+            "environment_value": 3,
+            "social_vs_professional": 6
+        }
+    },
+    "user_ird": {
         "user_id": str,
         "first_name": str,
         "last_name": str,
@@ -22,6 +38,7 @@ USERS = {
             "social_vs_professional": 6
         }
     }
+    
 }
 
 
@@ -36,9 +53,9 @@ def standardize_data(clubs, preferences):
 
 def store_slider_responses(users,user):
     responses = []
-    for u in users.values():
+    for u in users.keys():
         if user == u:
-            responses.append(user["slider_responses"])
+            responses.append(users[u]["slider_responses"])
     df = pd.DataFrame(responses)
     return df
 
@@ -67,4 +84,4 @@ def model(user, k):
 
     return nearest_clubs
 
-print(model(3))
+print(model("user_id",3))
