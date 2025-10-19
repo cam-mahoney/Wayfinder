@@ -3,9 +3,9 @@
 //import image from "../assets/image.svg";
 
 export const customerQuotes = [
-  { quote: "A terrific piece of praise", name: "Alice", description: "Great teamwork", avatar },
-  { quote: "A fantastic bit of feedback", name: "Bob", description: "Loved it", avatar: image },
-  { quote: "A genuinely glowing review", name: "Charlie", description: "Highly recommend", avatar: avatar2 },
+  { quote: "A terrific piece of praise", name: "Alice", description: "Great teamwork", avatar: null },
+  { quote: "A fantastic bit of feedback", name: "Bob", description: "Loved it", avatar: null },
+  { quote: "A genuinely glowing review", name: "Charlie", description: "Highly recommend", avatar: null },
 ];
 
 export const cards = [
