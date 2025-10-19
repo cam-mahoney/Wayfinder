@@ -47,8 +47,8 @@ for o in ORGS:
 #   "last_name": str,   
 #   "slider_responses": { key: int },
 #   "swipes": { org_id: "yes"|"no" },
-#   "liked_orgs": [org_id, ...],
-#   "disliked_orgs": [org_id, ...]
+#   "good_orgs": [org_id, ...],
+#   "bad_orgs": [org_id, ...]
 # }
 """
 USERS = {}
@@ -186,8 +186,122 @@ def submit_questionnaire():
 
 
 # ----------------------------
-# Swiping Routes
+# Swiping logic
 # ----------------------------
+def _base_deck(user: dict, orgs: list[dict], limit:int=20) -> list:
+    """
+    Build a deck of organizations to swipe using recommender.model(user, k):
+    Returns a list of organizations
+    """
+    from recommender import model as recommend_model
+    
+    user_id = user["user_id"]
+    preferred_organizations = recommend_model(user_id, limit)
+    
+    id_to_org = {}
+    
+    for org in orgs:
+        id_to_org[org["id"]] = org
+        
+    deck = []
+    for org_id in preferred_organizations:
+        deck.append(id_to_org[org_id])
+            
+    return deck 
+
+@app.get("/api/swipe/deck")
+def swipe_deck():
+    user_id = request.args.get("user_id") # parses everything after the ? 
+    if not user_id or user_id not in USERS: # error handling
+        abort(404, description="Unknown user id")
+    
+    limit = 15
+    
+    user_info = USERS[user_id]
+    orgs_deck = _base_deck(user_info, ORGS, limit)
+    
+    return jsonify({"deck": orgs_deck})
+
+@app.post('/api/swipe')
+def swipe_action():
+    """
+    Record a swipe on an organization card.
+    Body:
+      {
+        "user_id": "...",
+        "org_id": "...",
+        "decision": "yes" | "no"
+      }
+    Updates:
+      - USERS[user_id]["swipes"][org_id] = decision
+      - good_orgs
+      - bad_orgs 
+    """
+    request_body = request.get_json(silent=True) or {}
+    user_id = request_body.get("user_id")
+    org_id = request_body.get("org_id")
+    decision = request_body.get("decision")
+    
+    if not user_id or user_id not in USERS: # error handling
+        abort(404, description="Unknown user id")
+    if not org_id or org_id not in ORG_INDEX: # error handling
+        abort(404, description="Unknown organization id")
+    if decision not in ("yes", "no"):
+        abort(400, description="Decision must be yes or no")
+        
+    user_info = USERS[user_id]
+    user_info.setdefault("swipes", {})[org_id] = decision # record the swipe decision
+    
+    if decision == "yes":
+        if org_id not in user_info["good_orgs"]:
+            user_info["good_orgs"].append(org_id)
+        if org_id in user_info["bad_orgs"]: # remember to remove from bad_orgs if previously swiped no
+            user_info["bad_orgs"].remove(org_id)
+    else:  # decision is "no"
+        if org_id not in user_info["bad_orgs"]:
+            user_info["bad_orgs"].append(org_id)
+        if org_id in user_info["good_orgs"]: # remember to remove from good_orgs if previously swiped yes
+            user_info["good_orgs"].remove(org_id)
+    
+    return jsonify({"ok": True, 
+                    "swipes": user_info["swipes"], 
+                    "good_orgs": user_info["good_orgs"],
+                    "bad_orgs": user_info["bad_orgs"]})
+            
+@app.get("/api/swipe/info")
+def swipe_info():
+    """
+    Return the user's swipe history info.
+    Query: ?user_id=...
+    Response:
+      {
+        "swipes": { org_id: "yes"|"no", ... },
+        "good_orgs": [org_id, ...],
+        "bad_orgs": [org_id, ...]
+      }
+    """    
+    user_id = request.args.get("user-id")
+    if not user_id or user_id not in USERS: # error handling
+        abort(404, description="Unknown user id")
+        
+    user_info = USERS[user_id]
+    
+    return jsonify({"swipes": user_info.get("swipes",{}),
+                    "good_orgs": user_info.get("good_orgs", []),
+                    "bad_orgs": user_info.get("bad_orgs", [])})
+    
+    
+    
+
+
+        
+    
+
+    
+    
+    
+    
+
 
 
 
