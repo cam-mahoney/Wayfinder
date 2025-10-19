@@ -22,7 +22,6 @@ USERS = {
         }
     },
     "user_ird": {
-        "user_id": str,
         "first_name": str,
         "last_name": str,
         "slider_responses": {
