@@ -87,12 +87,12 @@ def convert_to_int(i, default=0):
 # ----------------------------
 # Basic Routes
 # ----------------------------
-@app.get("/api/health")
+@app.get("/health")
 def health():
     return {"status":"ok"}, 200
 
 # route for registering a new user 
-@app.post("/api/register")
+@app.post("/register")
 def register():
     request_body = request.get_json(silent=True) or {} # in case empty. converts to python dictionarys
     user = new_user(request_body.get("first_name"), request_body.get("last_name")) # register new user
@@ -105,7 +105,7 @@ def register():
                     }})
     
 # route for updating a user profile (updates the questionaire answers from the user)
-@app.patch("/api/user")
+@app.patch("/user")
 def update_user():
     """
         Body:
@@ -137,7 +137,7 @@ def update_user():
     
     return jsonify({"ok": True, "slider_responses": cleaned_responses})
 
-@app.get("/api/user")
+@app.get("/user")
 def get_user():
     user_id = request.args.get("user_id") # parses everything after the ? 
     if not user_id or user_id not in USERS: # error handling
@@ -160,12 +160,12 @@ def get_user():
 # ----------------------------
 # Questionaire Routes
 # ----------------------------
-@app.get("/api/prompts")
+@app.get("/prompts")
 def get_prompts():
     return jsonify({"prompts": PROMPTS})
 
 # save user preferences after questionaire submission
-@app.post("/api/questionnaire/submit")
+@app.post("/questionnaire/submit")
 def submit_questionnaire():
     request_body = request.get_json(silent=True) or {}
     user_id = request_body.get("user_id")
@@ -209,7 +209,7 @@ def _base_deck(user: dict, orgs: list[dict], limit:int=20) -> list:
             
     return deck 
 
-@app.get("/api/swipe/deck")
+@app.get("/swipe/deck")
 def swipe_deck():
     user_id = request.args.get("user_id") # parses everything after the ? 
     if not user_id or user_id not in USERS: # error handling
@@ -222,7 +222,7 @@ def swipe_deck():
     
     return jsonify({"deck": orgs_deck})
 
-@app.post('/api/swipe')
+@app.post('/swipe')
 def swipe_action():
     """
     Record a swipe on an organization card.
@@ -268,7 +268,7 @@ def swipe_action():
                     "good_orgs": user_info["good_orgs"],
                     "bad_orgs": user_info["bad_orgs"]})
             
-@app.get("/api/swipe/info")
+@app.get("/swipe/info")
 def swipe_info():
     """
     Return the user's swipe history info.
@@ -280,7 +280,7 @@ def swipe_info():
         "bad_orgs": [org_id, ...]
       }
     """    
-    user_id = request.args.get("user-id")
+    user_id = request.args.get("user_id")
     if not user_id or user_id not in USERS: # error handling
         abort(404, description="Unknown user id")
         
@@ -289,18 +289,6 @@ def swipe_info():
     return jsonify({"swipes": user_info.get("swipes",{}),
                     "good_orgs": user_info.get("good_orgs", []),
                     "bad_orgs": user_info.get("bad_orgs", [])})
-    
-    
-    
-
-
-        
-    
-
-    
-    
-    
-    
 
 
 
