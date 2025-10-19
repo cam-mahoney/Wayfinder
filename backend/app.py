@@ -3,8 +3,6 @@ from flask_cors import CORS
 from uuid import uuid4
 import json, os
 
-
-
 app = Flask(__name__)
 CORS(app)
 
@@ -19,10 +17,10 @@ ORGS_DIR = os.path.join(DATA_DIR, "orgs.json") # path to the organization data
 PROMPTS_DIR = os.path.join(DATA_DIR, "prompts.json") # path to the prompt data
 
 with open(ORGS_DIR, "r", encoding="utf-8") as file:
-    ORGS = json.load(file) # convert JSON file to dictionary object
+    ORGS = json.load(file) # convert JSON file to python list
     
 with open(PROMPTS_DIR, "r", encoding="utf-8") as file:
-    PROMPTS = json.load(file) # convert JSON file to dictionary object
+    PROMPTS = json.load(file) # convert JSON file to python list
 
 """
 EG:
@@ -116,7 +114,6 @@ def update_user():
         "question_2": 150,
         "question_3": 8
       },
-      "replace": false          # optional; if true, replace all answers
     }
     """
     request_body = request.get_json(silent=True) or {}
@@ -289,9 +286,6 @@ def swipe_info():
     return jsonify({"swipes": user_info.get("swipes",{}),
                     "good_orgs": user_info.get("good_orgs", []),
                     "bad_orgs": user_info.get("bad_orgs", [])})
-
-
-
 
 
 if __name__ == "__main__":
